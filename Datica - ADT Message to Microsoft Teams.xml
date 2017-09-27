@@ -1,0 +1,537 @@
+<channel version="3.4.1">
+  <id>3a0d6cc3-aa81-405f-9030-9e6f1aaede1e</id>
+  <nextMetaDataId>2</nextMetaDataId>
+  <name>Datica - ADT Message to Microsoft Teams</name>
+  <description></description>
+  <enabled>true</enabled>
+  <lastModified>
+    <time>1506527454772</time>
+    <timezone>America/New_York</timezone>
+  </lastModified>
+  <revision>6</revision>
+  <sourceConnector version="3.4.1">
+    <metaDataId>0</metaDataId>
+    <name>sourceConnector</name>
+    <properties class="com.mirth.connect.connectors.http.HttpReceiverProperties" version="3.4.1">
+      <pluginProperties>
+        <com.mirth.connect.plugins.httpauth.NoneHttpAuthProperties version="3.4.1">
+  <authType>NONE</authType>
+        </com.mirth.connect.plugins.httpauth.NoneHttpAuthProperties>
+      </pluginProperties>
+      <listenerConnectorProperties version="3.4.1">
+        <host>0.0.0.0</host>
+        <port>4444</port>
+      </listenerConnectorProperties>
+      <sourceConnectorProperties version="3.4.1">
+        <responseVariable>None</responseVariable>
+        <respondAfterProcessing>true</respondAfterProcessing>
+        <processBatch>false</processBatch>
+        <firstResponse>false</firstResponse>
+        <processingThreads>1</processingThreads>
+        <resourceIds class="linked-hash-map">
+          <entry>
+            <string>Default Resource</string>
+            <string>[Default Resource]</string>
+          </entry>
+        </resourceIds>
+        <queueBufferSize>1000</queueBufferSize>
+      </sourceConnectorProperties>
+      <xmlBody>false</xmlBody>
+      <parseMultipart>true</parseMultipart>
+      <includeMetadata>false</includeMetadata>
+      <binaryMimeTypes>application/.*(?&lt;!json|xml)$|image/.*|video/.*|audio/.*</binaryMimeTypes>
+      <binaryMimeTypesRegex>true</binaryMimeTypesRegex>
+      <responseContentType>text/plain</responseContentType>
+      <responseDataTypeBinary>false</responseDataTypeBinary>
+      <responseStatusCode></responseStatusCode>
+      <responseHeaders class="linked-hash-map"/>
+      <charset>UTF-8</charset>
+      <contextPath></contextPath>
+      <timeout>0</timeout>
+      <staticResources/>
+    </properties>
+    <transformer version="3.4.1">
+      <steps>
+        <step>
+          <sequenceNumber>0</sequenceNumber>
+          <name>pull ADT into Body</name>
+          <script>//This is just something to generate a due date in the card
+var d = new Date().toString();
+
+//TODO: This should be the endpoint of the Datica Teams to Allscripts EHR channel on your Mirth instance
+var taskEndpoint = &quot;&quot;;
+
+//TODO: This should be the Incoming Webook Connector URL that you setup in your Teams channel
+//This is a very simple example, but in production you would want to run some eval to determine which channel to route the message to
+//For example, a basic example on routing based on PCP would be:
+//
+//if (msg[&apos;ROL&apos;][0][&apos;ROL.4&apos;][&apos;ROL.4.1&apos;].toString() == &quot;PCPID&quot;) {
+//	teamsEndpoint = msg[&apos;ROL&apos;][0][&apos;ROL.4&apos;][&apos;ROL.4.1&apos;].toString();
+//}
+//else {
+//// Use the default endpoint
+//	teamsEndpoint = &quot;DefaultURL&quot;;
+//}
+
+var teamsEndpoint = &quot;&quot;;
+
+//TODO: In production, you&apos;d want to setup authentication up against Teams. 
+//This would be a good place to init any variables around tokens or secrets.
+
+
+
+var body = {
+    &quot;@type&quot;: &quot;MessageCard&quot;,
+    &quot;@context&quot;: &quot;http://schema.org/extensions&quot;,
+    &quot;themeColor&quot;: &quot;0076D7&quot;,
+    &quot;summary&quot;: &quot;One of your patients was just admitted to the hospital&quot;,
+    &quot;sections&quot;: [
+        {
+            &quot;activityTitle&quot;: &quot;![TestImage](https://cdn.pixabay.com/photo/2017/07/30/18/34/man-2555188_960_720.jpg)One of your patients was just admitted to the hopsital&quot;,
+            &quot;activitySubtitle&quot;: &quot;Make sure the PCP is notified and acknowledges the admission&quot;,
+            &quot;activityImage&quot;: &quot;https://cdn.pixabay.com/photo/2017/07/30/18/34/man-2555188_960_720.jpg&quot;,
+            &quot;facts&quot;: [
+                {
+                    &quot;name&quot;: &quot;Patient Name&quot;,
+                    &quot;value&quot;: msg[&apos;PID&apos;][&apos;PID.5&apos;][&apos;PID.5.2&apos;].toString() + &quot; &quot; + msg[&apos;PID&apos;][&apos;PID.5&apos;][&apos;PID.5.1&apos;].toString()
+                },
+                {
+                    &quot;name&quot;: &quot;Medical Record Number&quot;,
+                    &quot;value&quot;: msg[&apos;PID&apos;][&apos;PID.3&apos;][&apos;PID.3.1&apos;].toString()
+                },
+                {
+                    &quot;name&quot;: &quot;Patient Location&quot;,
+                    &quot;value&quot;: msg[&apos;PV1&apos;][&apos;PV1.3&apos;][&apos;PV1.3.1&apos;].toString() + &quot; &quot; + msg[&apos;PV1&apos;][&apos;PV1.3&apos;][&apos;PV1.3.2&apos;].toString()
+                },
+                {
+                    &quot;name&quot;: &quot;Assigned to&quot;,
+                    &quot;value&quot;: &quot;Clinician Name&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;Due date&quot;,
+                    &quot;value&quot;: d
+                },
+                {
+                    &quot;name&quot;: &quot;Status&quot;,
+                    &quot;value&quot;: &quot;Not started&quot;
+                }
+            ],
+            &quot;markdown&quot;: true
+        }
+    ],
+    &quot;potentialAction&quot;: [
+        {
+            &quot;@type&quot;: &quot;HttpPOST&quot;,
+            &quot;name&quot;: &quot;Get Patient Summary&quot;,
+            &quot;target&quot;: &quot;http://...&quot;
+        },
+        {
+            &quot;@type&quot;: &quot;ActionCard&quot;,
+            &quot;name&quot;: &quot;Send Message to Pt. Portal&quot;,
+            &quot;inputs&quot;: [
+                {
+                    &quot;@type&quot;: &quot;TextInput&quot;,
+                    &quot;id&quot;: &quot;message&quot;,
+                    &quot;isMultiline&quot;: true,
+                    &quot;title&quot;: &quot;Send a message to patient&quot;
+                }
+            ],
+            &quot;actions&quot;: [
+                {
+                    &quot;@type&quot;: &quot;HttpPOST&quot;,
+                    &quot;name&quot;: &quot;Send&quot;,
+                    &quot;target&quot;: &quot;http://...&quot;
+                }
+            ]
+        },
+        {
+            &quot;@type&quot;: &quot;ActionCard&quot;,
+            &quot;name&quot;: &quot;Create EHR Task for PCP&quot;,
+            &quot;inputs&quot;: [
+                {
+                    &quot;@type&quot;: &quot;TextInput&quot;,
+                    &quot;id&quot;: &quot;msg&quot;,
+                    &quot;isMultiline&quot;: true,
+                    &quot;title&quot;: &quot;Task Details&quot;
+                }
+            ],
+            &quot;actions&quot;: [
+                {
+                    &quot;@type&quot;: &quot;HttpPOST&quot;,
+                    &quot;name&quot;: &quot;Send&quot;,
+                    &quot;target&quot;: taskEndpoint + msg[&apos;PID&apos;][&apos;PID.3&apos;][&apos;PID.3.1&apos;].toString(),
+                    &quot;body&quot;: &quot;{{msg.value}}&quot;
+                }
+            ]
+        }
+    ]
+}
+
+
+//You use the ChannelMap to move variables between Mirth steps and also to log data for transactions.
+channelMap.put(&quot;body&quot;, JSON.stringify(body));
+channelMap.put(&quot;teamsEndpoint&quot;, teamsEndpoint);</script>
+          <type>JavaScript</type>
+          <data>
+            <entry>
+              <string>Script</string>
+              <string>//This is just something to generate a due date in the card
+var d = new Date().toString();
+
+//TODO: This should be the endpoint of the Datica Teams to Allscripts EHR channel on your Mirth instance
+var taskEndpoint = &quot;&quot;;
+
+//TODO: This should be the Incoming Webook Connector URL that you setup in your Teams channel
+//This is a very simple example, but in production you would want to run some eval to determine which channel to route the message to
+//For example, a basic example on routing based on PCP would be:
+//
+//if (msg[&apos;ROL&apos;][0][&apos;ROL.4&apos;][&apos;ROL.4.1&apos;].toString() == &quot;PCPID&quot;) {
+//	teamsEndpoint = msg[&apos;ROL&apos;][0][&apos;ROL.4&apos;][&apos;ROL.4.1&apos;].toString();
+//}
+//else {
+//// Use the default endpoint
+//	teamsEndpoint = &quot;DefaultURL&quot;;
+//}
+
+var teamsEndpoint = &quot;&quot;;
+
+//TODO: In production, you&apos;d want to setup authentication up against Teams. 
+//This would be a good place to init any variables around tokens or secrets.
+
+
+
+var body = {
+    &quot;@type&quot;: &quot;MessageCard&quot;,
+    &quot;@context&quot;: &quot;http://schema.org/extensions&quot;,
+    &quot;themeColor&quot;: &quot;0076D7&quot;,
+    &quot;summary&quot;: &quot;One of your patients was just admitted to the hospital&quot;,
+    &quot;sections&quot;: [
+        {
+            &quot;activityTitle&quot;: &quot;![TestImage](https://cdn.pixabay.com/photo/2017/07/30/18/34/man-2555188_960_720.jpg)One of your patients was just admitted to the hopsital&quot;,
+            &quot;activitySubtitle&quot;: &quot;Make sure the PCP is notified and acknowledges the admission&quot;,
+            &quot;activityImage&quot;: &quot;https://cdn.pixabay.com/photo/2017/07/30/18/34/man-2555188_960_720.jpg&quot;,
+            &quot;facts&quot;: [
+                {
+                    &quot;name&quot;: &quot;Patient Name&quot;,
+                    &quot;value&quot;: msg[&apos;PID&apos;][&apos;PID.5&apos;][&apos;PID.5.2&apos;].toString() + &quot; &quot; + msg[&apos;PID&apos;][&apos;PID.5&apos;][&apos;PID.5.1&apos;].toString()
+                },
+                {
+                    &quot;name&quot;: &quot;Medical Record Number&quot;,
+                    &quot;value&quot;: msg[&apos;PID&apos;][&apos;PID.3&apos;][&apos;PID.3.1&apos;].toString()
+                },
+                {
+                    &quot;name&quot;: &quot;Patient Location&quot;,
+                    &quot;value&quot;: msg[&apos;PV1&apos;][&apos;PV1.3&apos;][&apos;PV1.3.1&apos;].toString() + &quot; &quot; + msg[&apos;PV1&apos;][&apos;PV1.3&apos;][&apos;PV1.3.2&apos;].toString()
+                },
+                {
+                    &quot;name&quot;: &quot;Assigned to&quot;,
+                    &quot;value&quot;: &quot;Clinician Name&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;Due date&quot;,
+                    &quot;value&quot;: d
+                },
+                {
+                    &quot;name&quot;: &quot;Status&quot;,
+                    &quot;value&quot;: &quot;Not started&quot;
+                }
+            ],
+            &quot;markdown&quot;: true
+        }
+    ],
+    &quot;potentialAction&quot;: [
+        {
+            &quot;@type&quot;: &quot;HttpPOST&quot;,
+            &quot;name&quot;: &quot;Get Patient Summary&quot;,
+            &quot;target&quot;: &quot;http://...&quot;
+        },
+        {
+            &quot;@type&quot;: &quot;ActionCard&quot;,
+            &quot;name&quot;: &quot;Send Message to Pt. Portal&quot;,
+            &quot;inputs&quot;: [
+                {
+                    &quot;@type&quot;: &quot;TextInput&quot;,
+                    &quot;id&quot;: &quot;message&quot;,
+                    &quot;isMultiline&quot;: true,
+                    &quot;title&quot;: &quot;Send a message to patient&quot;
+                }
+            ],
+            &quot;actions&quot;: [
+                {
+                    &quot;@type&quot;: &quot;HttpPOST&quot;,
+                    &quot;name&quot;: &quot;Send&quot;,
+                    &quot;target&quot;: &quot;http://...&quot;
+                }
+            ]
+        },
+        {
+            &quot;@type&quot;: &quot;ActionCard&quot;,
+            &quot;name&quot;: &quot;Create EHR Task for PCP&quot;,
+            &quot;inputs&quot;: [
+                {
+                    &quot;@type&quot;: &quot;TextInput&quot;,
+                    &quot;id&quot;: &quot;msg&quot;,
+                    &quot;isMultiline&quot;: true,
+                    &quot;title&quot;: &quot;Task Details&quot;
+                }
+            ],
+            &quot;actions&quot;: [
+                {
+                    &quot;@type&quot;: &quot;HttpPOST&quot;,
+                    &quot;name&quot;: &quot;Send&quot;,
+                    &quot;target&quot;: taskEndpoint + msg[&apos;PID&apos;][&apos;PID.3&apos;][&apos;PID.3.1&apos;].toString(),
+                    &quot;body&quot;: &quot;{{msg.value}}&quot;
+                }
+            ]
+        }
+    ]
+}
+
+
+//You use the ChannelMap to move variables between Mirth steps and also to log data for transactions.
+channelMap.put(&quot;body&quot;, JSON.stringify(body));
+channelMap.put(&quot;teamsEndpoint&quot;, teamsEndpoint);</string>
+            </entry>
+          </data>
+        </step>
+      </steps>
+      <inboundTemplate encoding="base64">TVNIfF5+XCZ8U0VOREFQUHxTRU5ERkFDfFJFQ1ZBUFB8UkVDVkZBQ3wyMDA3MDcxOTEzMDgxMS0w
+ODAwfHxBRFReQTAxfDQ2NTE3MXxEfDIuMwpFVk58QTAxfDIwMTAwOTI3MDczNzQ1LTA4MDB8MjAx
+MTEyMTEwOTA1MjMtMDgwMHxVfDI1MTEwMXwyMDExMDMxNDE2MTI0NS0wODAwfEVWRU5URkFDClBJ
+RHwxfHwxMDcxMl5eXl5NUk58fE9sc2NoZXNreV5NYXJrXlR8QUFURVNUfDE5OTEwMzEwMDgwOTEw
+LTA4MDB8TXxST05BTER8fDY0MCBXIEJBUkZPUkQgQVZFXl5NSUxXQVVLRUVeV0leNTMyMTFeVVNB
+fHwoNDE0KTg4OC01NTg4Xl5eYnp6dGVzdEBnbWFpbC5jb21+Xl5ecm9ubnltY2Rvbm55QHJlYWxz
+aXRlLm5ldHwoNDE0KTQ0NC0zMzMzfEVOR3xNfE1PVHw2NjAwMDc1NzYzfDMzMzc3MjIyMnxZNTUy
+OTU4MzExMDA0Mnx8VXx8Tnx8VVNBfHx8fE4KTksxfDF8WlpURVNUXkRBVUdIVEVSfENIRHw0NDIy
+IFMgTE9PTUlTIEJMVkReMTAzXldFU1QgQUxMSVNeV0leNTMyMTR8KDQxNCkyMjItODg4OHwoNDE0
+KTMzMy01NTU1fE4KTksxfDJ8WlpURVNUXlNQT1VTRXxTUE98OTIwMCBXIFNUQVRFIFNUXjNeTUFE
+SVNPTl5XSV41MzIyNnwoNDE0KTg4Ny02NDUzfCg2MDgpNDU2LTc4OTB8QwpQVjF8MXxJfE1lZCBT
+dXJnXjIwNF4xXlhYRkFDXlhYU1RBVFVTXk5VUlNJTkdeWFhCVUlMRElOR3xVfHxYWFBSSU9SfDEy
+MzQ1Nl5EVUNLXkRBRkZZXlBeSlJeRFJeUGguRC58fHxNRUR8WFhURU1QfHx8fEEwfHw3ODIyMDBe
+UElHXlBPUktZfHxFNDAwMzY5Mnx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHwyMDE1MTIyMjEzMjMw
+Ni0wODAwClBWMnxaWlBSSU9SUEVORElOR3x8MjY3MTY4MDAxXkJsb29kIGluIHVyaW5lXlNOT01F
+RC1DVHx8V2FsbGV0LCBrZXlzLCBjZWxsIHBob25lLCBmaXRiaXQufFpaVkFMTE9DfHwyMDE2MDQy
+MTExMTU0NS0wODAwfDIwMTYwNDIxMTc0NTAwLTA4MDB8fHxUeXBpY2FsIGxhYiBzdHVmZi4gWW91
+IGtub3csIGxpa2UgYmxvb2QgZHJhd3MuIFRoYXQgc29ydCBvZiB0aGluZy58fDIwMTYwMzIxfE58
+UHwyMDE3MDQyMXxPfE58MXxVfFl8WlpDTElOSUN8fHwyMDE2MDIxMHx8MjAxNDAxMDF8MjAxNTAy
+MzB8fFJFQ1VSfHx8Tnx8Tnx8Q3xNT3xBQ3xEfEF8WXxOCk9CWHwxfENXRXwyNzE2NDkwMDZeU3lz
+dG9saWMgYmxvb2QgcHJlc3N1cmVeU05PTUVELUNUfHwxMjB8bW1IZ3x8fHx8Rnx8fDIwMTUxMjIy
+MTMzNTAwLTA4MDB8fDUyOTM2ODgxXkRVQ0teREFGRlkKT0JYfDJ8Q1dFfDI3MTY1MDAwNl5EaWFz
+dG9saWMgYmxvb2QgcHJlc3N1cmVeU05PTUVELUNUfHw4MHxtbUhnfHx8fHxGfHx8MjAxNTEyMjIx
+MzM1MDAtMDgwMHx8NTI5MzY4ODFeRFVDS15EQUZGWQpST0x8MXxBRHxQUHw3ODM5MDJeTU9VU0Ve
+TUlDS0VZXk18MjAxNjAyMTYxMTE1MDAtMDgwMHwyMDE2MDIxNjEyNDUwMC0wODAwfDEgaG91ciAz
+MCBtaW51dGVzfFJFQVNPTlMgRk9SIFJPTEV8UFJPVklERVIgVFlQRXwyfDEyMyBGQUtFIFNUXjQ1
+Nl5NQURJU09OXldJXjUzNzAzfCg2MDgpNTU1LTExMTF8WFhQT0NeMjAxXl5YWEZBQ3xIRUFMVEhD
+QVJFIE9SRwpST0x8MnxVTHxPUHw1NjY3ODNeUkFCQklUXkpFU1NJQ0FeS3wyMDExMDcxNzE2MDAw
+MC0wODAwfDIwMTEwNzE3MTYyMDAwLTA4MDB8MjAgbWludXRlc3xSRUFTT05TIEZPUiBST0xFfFBS
+T1ZJREVSIFRZUEV8T3w4NzYgUEhPTlkgQk9MT0dORSBDVF4xMjM0Xk1BRElTT05eV0leNTM3MTZ8
+KDYwOCk1NTUtNjY2NnxXV1BPQ14zMDNeXldXRkFDfEhFQUxUSENBUkUgT1JHCkRHMXwxfHw1Mjcu
+N15EcnkgbW91dGheSUNEIDl8fDIwMTUxMjIyMTcwMDAwLTA4MDB8VwpERzF8Mnx8RTkyNy4xXk92
+ZXJleGVydGlvbiBmcm9tIHByb2xvbmdlZCBzdGF0aWMgcG9zaXRpb25eSUNEIDl8fDIwMTUxMjIy
+MTcwMDAwLTA4MDB8RgpJTjF8MXw3NDgyOTQ3NXwxOTMwNDczfFdXSU5TVVJBTkNFfDQwMDAgUkVH
+RU5UIFNUXjNeTUFESVNPTl5XSV41MzIxMV5VU0F8V1dDT05UQUNUXkdFUkFMRF5QfCg2MDgpNDQ0
+LTEyMTJ8Rlo0Mjg5NjV8fHxIVUVZLCBERVdFWSBBTkQgTE9VSUUgTEFXIE9GRklDRVN8MjAxMzA2
+MTQwMDAwMDAtMDgwMHwyMDE4MDYxNDAwMDAwMC0wODAwfEFVVEhOVU18fFFRVEVTVF5CSUZGXkx8
+RlRIfDE5NjIwNTIyMjEyMDU1LTA4MDB8NDIxIFMgQlVSUiBPQUsgRFJeXk1BRElTT05eV0leNTM3
+MTNeVVNBfFl8Q098fE58fE58fHx8fHx8fHx8Rlo1OFgyOTNWfDY3ODkzNDUyfHx8fHx8MXxNfDY3
+MzIgTUlORVJBTCBQT0lOVCBSRF5eTUFESVNPTl5XSV41MzcxOV5VU0F8fHxIfHw3MTEzCklOMnwx
+MTQyMDc3ODN8MTIyLTMzLTQ0NTV8fHxQfHx8fHx8fHx8fHx8fHx8fHx8fHx8fHxQcml2YXRlXlBl
+cmNlbnRhZ2VeOTB8fHx8VVNBfEVOR3x8fHxOfE1PVHx8fE18fHxEZWZlbnNlIEF0dG9ybmV5fGxh
+d3llcnwxfEhETENPTlRBQ1ReSHVleV5EfCg2MDgpNjY2LTY5Njl8fHx8fHx8fCg2MDgpNDQ0LTEy
+MTJ8ZmFtaWx5fHwxMTAwOTM0NTJ8RlRIfCg2MDgpMjIyLTMwMDB8KDYwOCk3NzctMjI0Mwo=</inboundTemplate>
+      <outboundTemplate encoding="base64"></outboundTemplate>
+      <inboundDataType>HL7V2</inboundDataType>
+      <outboundDataType>RAW</outboundDataType>
+      <inboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="3.4.1">
+        <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="3.4.1">
+          <handleRepetitions>true</handleRepetitions>
+          <handleSubcomponents>true</handleSubcomponents>
+          <useStrictParser>false</useStrictParser>
+          <useStrictValidation>false</useStrictValidation>
+          <stripNamespaces>true</stripNamespaces>
+          <segmentDelimiter>\r</segmentDelimiter>
+          <convertLineBreaks>true</convertLineBreaks>
+        </serializationProperties>
+        <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="3.4.1">
+          <useStrictParser>false</useStrictParser>
+          <useStrictValidation>false</useStrictValidation>
+          <segmentDelimiter>\r</segmentDelimiter>
+        </deserializationProperties>
+        <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="3.4.1">
+          <splitType>MSH_Segment</splitType>
+          <batchScript></batchScript>
+        </batchProperties>
+        <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="3.4.1">
+          <segmentDelimiter>\r</segmentDelimiter>
+          <successfulACKCode>AA</successfulACKCode>
+          <successfulACKMessage></successfulACKMessage>
+          <errorACKCode>AE</errorACKCode>
+          <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+          <rejectedACKCode>AR</rejectedACKCode>
+          <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+          <msh15ACKAccept>false</msh15ACKAccept>
+          <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+        </responseGenerationProperties>
+        <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="3.4.1">
+          <successfulACKCode>AA,CA</successfulACKCode>
+          <errorACKCode>AE,CE</errorACKCode>
+          <rejectedACKCode>AR,CR</rejectedACKCode>
+          <validateMessageControlId>true</validateMessageControlId>
+          <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+          <originalIdMapVariable></originalIdMapVariable>
+        </responseValidationProperties>
+      </inboundProperties>
+      <outboundProperties class="com.mirth.connect.plugins.datatypes.raw.RawDataTypeProperties" version="3.4.1">
+        <batchProperties class="com.mirth.connect.plugins.datatypes.raw.RawBatchProperties" version="3.4.1">
+          <splitType>JavaScript</splitType>
+          <batchScript></batchScript>
+        </batchProperties>
+      </outboundProperties>
+    </transformer>
+    <filter version="3.4.1">
+      <rules/>
+    </filter>
+    <transportName>HTTP Listener</transportName>
+    <mode>SOURCE</mode>
+    <enabled>true</enabled>
+    <waitForPrevious>true</waitForPrevious>
+  </sourceConnector>
+  <destinationConnectors>
+    <connector version="3.4.1">
+      <metaDataId>1</metaDataId>
+      <name>Destination 1</name>
+      <properties class="com.mirth.connect.connectors.http.HttpDispatcherProperties" version="3.4.1">
+        <pluginProperties/>
+        <destinationConnectorProperties version="3.4.1">
+          <queueEnabled>false</queueEnabled>
+          <sendFirst>false</sendFirst>
+          <retryIntervalMillis>10000</retryIntervalMillis>
+          <regenerateTemplate>false</regenerateTemplate>
+          <retryCount>0</retryCount>
+          <rotate>false</rotate>
+          <includeFilterTransformer>false</includeFilterTransformer>
+          <threadCount>1</threadCount>
+          <threadAssignmentVariable></threadAssignmentVariable>
+          <validateResponse>false</validateResponse>
+          <resourceIds class="linked-hash-map">
+            <entry>
+              <string>Default Resource</string>
+              <string>[Default Resource]</string>
+            </entry>
+          </resourceIds>
+          <queueBufferSize>1000</queueBufferSize>
+        </destinationConnectorProperties>
+        <host>${teamsEndpoint}</host>
+        <useProxyServer>false</useProxyServer>
+        <proxyAddress></proxyAddress>
+        <proxyPort></proxyPort>
+        <method>post</method>
+        <headers class="linked-hash-map"/>
+        <parameters class="linked-hash-map"/>
+        <responseXmlBody>false</responseXmlBody>
+        <responseParseMultipart>true</responseParseMultipart>
+        <responseIncludeMetadata>false</responseIncludeMetadata>
+        <responseBinaryMimeTypes>application/.*(?&lt;!json|xml)$|image/.*|video/.*|audio/.*</responseBinaryMimeTypes>
+        <responseBinaryMimeTypesRegex>true</responseBinaryMimeTypesRegex>
+        <multipart>false</multipart>
+        <useAuthentication>false</useAuthentication>
+        <authenticationType>Basic</authenticationType>
+        <usePreemptiveAuthentication>false</usePreemptiveAuthentication>
+        <username></username>
+        <password></password>
+        <content>${body}</content>
+        <contentType>application/json</contentType>
+        <dataTypeBinary>false</dataTypeBinary>
+        <charset>UTF-8</charset>
+        <socketTimeout>30000</socketTimeout>
+      </properties>
+      <transformer version="3.4.1">
+        <steps/>
+        <inboundDataType>RAW</inboundDataType>
+        <outboundDataType>RAW</outboundDataType>
+        <inboundProperties class="com.mirth.connect.plugins.datatypes.raw.RawDataTypeProperties" version="3.4.1">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.raw.RawBatchProperties" version="3.4.1">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </inboundProperties>
+        <outboundProperties class="com.mirth.connect.plugins.datatypes.raw.RawDataTypeProperties" version="3.4.1">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.raw.RawBatchProperties" version="3.4.1">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </outboundProperties>
+      </transformer>
+      <responseTransformer version="3.4.1">
+        <steps/>
+        <inboundDataType>RAW</inboundDataType>
+        <outboundDataType>RAW</outboundDataType>
+        <inboundProperties class="com.mirth.connect.plugins.datatypes.raw.RawDataTypeProperties" version="3.4.1">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.raw.RawBatchProperties" version="3.4.1">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </inboundProperties>
+        <outboundProperties class="com.mirth.connect.plugins.datatypes.raw.RawDataTypeProperties" version="3.4.1">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.raw.RawBatchProperties" version="3.4.1">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </outboundProperties>
+      </responseTransformer>
+      <filter version="3.4.1">
+        <rules/>
+      </filter>
+      <transportName>HTTP Sender</transportName>
+      <mode>DESTINATION</mode>
+      <enabled>true</enabled>
+      <waitForPrevious>true</waitForPrevious>
+    </connector>
+  </destinationConnectors>
+  <preprocessingScript>// Modify the message variable below to pre process data
+return message;</preprocessingScript>
+  <postprocessingScript>// This script executes once after a message has been processed
+// Responses returned from here will be stored as &quot;Postprocessor&quot; in the response map
+return;</postprocessingScript>
+  <deployScript>// This script executes once when the channel is deployed
+// You only have access to the globalMap and globalChannelMap here to persist data
+return;</deployScript>
+  <undeployScript>// This script executes once when the channel is undeployed
+// You only have access to the globalMap and globalChannelMap here to persist data
+return;</undeployScript>
+  <properties version="3.4.1">
+    <clearGlobalChannelMap>true</clearGlobalChannelMap>
+    <messageStorageMode>DEVELOPMENT</messageStorageMode>
+    <encryptData>false</encryptData>
+    <removeContentOnCompletion>false</removeContentOnCompletion>
+    <removeOnlyFilteredOnCompletion>false</removeOnlyFilteredOnCompletion>
+    <removeAttachmentsOnCompletion>false</removeAttachmentsOnCompletion>
+    <initialState>STARTED</initialState>
+    <storeAttachments>false</storeAttachments>
+    <tags class="linked-hash-set"/>
+    <metaDataColumns>
+      <metaDataColumn>
+        <name>SOURCE</name>
+        <type>STRING</type>
+        <mappingName>mirth_source</mappingName>
+      </metaDataColumn>
+      <metaDataColumn>
+        <name>TYPE</name>
+        <type>STRING</type>
+        <mappingName>mirth_type</mappingName>
+      </metaDataColumn>
+    </metaDataColumns>
+    <attachmentProperties version="3.4.1">
+      <type>None</type>
+      <properties/>
+    </attachmentProperties>
+    <archiveEnabled>true</archiveEnabled>
+    <resourceIds class="linked-hash-map">
+      <entry>
+        <string>Default Resource</string>
+        <string>[Default Resource]</string>
+      </entry>
+    </resourceIds>
+  </properties>
+  <codeTemplateLibraries/>
+</channel>

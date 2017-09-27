@@ -1,0 +1,387 @@
+<channel version="3.4.1">
+  <id>184f26f3-f72c-4208-a66e-6ff4b78d0d98</id>
+  <nextMetaDataId>3</nextMetaDataId>
+  <name>Datica - Microsoft Teams to Allscripts</name>
+  <description></description>
+  <enabled>true</enabled>
+  <lastModified>
+    <time>1506529354840</time>
+    <timezone>America/New_York</timezone>
+  </lastModified>
+  <revision>7</revision>
+  <sourceConnector version="3.4.1">
+    <metaDataId>0</metaDataId>
+    <name>sourceConnector</name>
+    <properties class="com.mirth.connect.connectors.http.HttpReceiverProperties" version="3.4.1">
+      <pluginProperties>
+        <com.mirth.connect.plugins.httpauth.NoneHttpAuthProperties version="3.4.1">
+  <authType>NONE</authType>
+        </com.mirth.connect.plugins.httpauth.NoneHttpAuthProperties>
+      </pluginProperties>
+      <listenerConnectorProperties version="3.4.1">
+        <host>0.0.0.0</host>
+        <port>4555</port>
+      </listenerConnectorProperties>
+      <sourceConnectorProperties version="3.4.1">
+        <responseVariable>None</responseVariable>
+        <respondAfterProcessing>true</respondAfterProcessing>
+        <processBatch>false</processBatch>
+        <firstResponse>false</firstResponse>
+        <processingThreads>1</processingThreads>
+        <resourceIds class="linked-hash-map">
+          <entry>
+            <string>Default Resource</string>
+            <string>[Default Resource]</string>
+          </entry>
+        </resourceIds>
+        <queueBufferSize>1000</queueBufferSize>
+      </sourceConnectorProperties>
+      <xmlBody>false</xmlBody>
+      <parseMultipart>true</parseMultipart>
+      <includeMetadata>false</includeMetadata>
+      <binaryMimeTypes>application/.*(?&lt;!json|xml)$|image/.*|video/.*|audio/.*</binaryMimeTypes>
+      <binaryMimeTypesRegex>true</binaryMimeTypesRegex>
+      <responseContentType>application/json</responseContentType>
+      <responseDataTypeBinary>false</responseDataTypeBinary>
+      <responseStatusCode>200</responseStatusCode>
+      <responseHeaders class="linked-hash-map">
+        <entry>
+          <string>CARD-ACTION-STATUS</string>
+          <list>
+            <string>Your task has been filed into Allscripts</string>
+          </list>
+        </entry>
+      </responseHeaders>
+      <charset>UTF-8</charset>
+      <contextPath></contextPath>
+      <timeout>0</timeout>
+      <staticResources/>
+    </properties>
+    <transformer version="3.4.1">
+      <steps>
+        <step>
+          <sequenceNumber>0</sequenceNumber>
+          <name>make a response</name>
+          <script>//TODO: In production, you would want to authorize the message from Teams to ensure its validity
+//The request from teams has a jwt token attached which is used for auth purposes
+//You can read about how to do this against Office 365 here: https://docs.microsoft.com/en-us/bot-framework/rest-api/bot-framework-rest-connector-authentication#connector-to-bot
+
+var jwt = sourceMap.get(&apos;headers&apos;).get(&apos;Authorization&apos;);
+channelMap.put(&quot;jwt&quot;, jwt);
+
+var task = msg.toString();
+channelMap.put(&quot;task&quot;, task);</script>
+          <type>JavaScript</type>
+          <data>
+            <entry>
+              <string>Script</string>
+              <string>//TODO: In production, you would want to authorize the message from Teams to ensure its validity
+//The request from teams has a jwt token attached which is used for auth purposes
+//You can read about how to do this against Office 365 here: https://docs.microsoft.com/en-us/bot-framework/rest-api/bot-framework-rest-connector-authentication#connector-to-bot
+
+var jwt = sourceMap.get(&apos;headers&apos;).get(&apos;Authorization&apos;);
+channelMap.put(&quot;jwt&quot;, jwt);
+
+var task = msg.toString();
+channelMap.put(&quot;task&quot;, task);</string>
+            </entry>
+          </data>
+        </step>
+      </steps>
+      <inboundTemplate encoding="base64"></inboundTemplate>
+      <outboundTemplate encoding="base64"></outboundTemplate>
+      <inboundDataType>RAW</inboundDataType>
+      <outboundDataType>RAW</outboundDataType>
+      <inboundProperties class="com.mirth.connect.plugins.datatypes.raw.RawDataTypeProperties" version="3.4.1">
+        <batchProperties class="com.mirth.connect.plugins.datatypes.raw.RawBatchProperties" version="3.4.1">
+          <splitType>JavaScript</splitType>
+          <batchScript></batchScript>
+        </batchProperties>
+      </inboundProperties>
+      <outboundProperties class="com.mirth.connect.plugins.datatypes.raw.RawDataTypeProperties" version="3.4.1">
+        <batchProperties class="com.mirth.connect.plugins.datatypes.raw.RawBatchProperties" version="3.4.1">
+          <splitType>JavaScript</splitType>
+          <batchScript></batchScript>
+        </batchProperties>
+      </outboundProperties>
+    </transformer>
+    <filter version="3.4.1">
+      <rules/>
+    </filter>
+    <transportName>HTTP Listener</transportName>
+    <mode>SOURCE</mode>
+    <enabled>true</enabled>
+    <waitForPrevious>true</waitForPrevious>
+  </sourceConnector>
+  <destinationConnectors>
+    <connector version="3.4.1">
+      <metaDataId>1</metaDataId>
+      <name>Get Token</name>
+      <properties class="com.mirth.connect.connectors.js.JavaScriptDispatcherProperties" version="3.4.1">
+        <pluginProperties/>
+        <destinationConnectorProperties version="3.4.1">
+          <queueEnabled>false</queueEnabled>
+          <sendFirst>false</sendFirst>
+          <retryIntervalMillis>10000</retryIntervalMillis>
+          <regenerateTemplate>false</regenerateTemplate>
+          <retryCount>0</retryCount>
+          <rotate>false</rotate>
+          <includeFilterTransformer>false</includeFilterTransformer>
+          <threadCount>1</threadCount>
+          <threadAssignmentVariable></threadAssignmentVariable>
+          <validateResponse>false</validateResponse>
+          <resourceIds class="linked-hash-map">
+            <entry>
+              <string>Default Resource</string>
+              <string>[Default Resource]</string>
+            </entry>
+          </resourceIds>
+          <queueBufferSize>1000</queueBufferSize>
+        </destinationConnectorProperties>
+        <script>//We prefer to roll our own HTTP requests at Datica to better handle errors/retries
+//You may decide to use the Mirth HTTP Sender instead.
+
+importPackage(Packages.org.apache.http.client);
+importPackage(Packages.org.apache.http.client.methods);
+importPackage(Packages.org.apache.http.impl.client);
+importPackage(Packages.org.apache.http.message);
+importPackage(Packages.org.apache.http.client.entity);
+importPackage(Packages.org.apache.http.util);
+importPackage(Packages.org.apache.http.entity);
+
+var httpclient2 = new DefaultHttpClient();
+
+//TODO: Set up your own auth
+
+var username = &quot;&quot;;
+var password = &quot;&quot;;
+
+var loginString = {&quot;Username&quot;:username, &quot;Password&quot;:password};
+
+var httpclient2 = new DefaultHttpClient();
+var httpPost2 = new HttpPost(&quot;http://twlatestga.unitysandbox.com/unity/unityservice.svc/json/GetToken&quot;);
+httpPost2.setHeader(&quot;Content-type&quot;, &quot;application/json&quot;);
+httpPost2.setEntity(new StringEntity((JSON.stringify(loginString)), &quot;UTF-8&quot;));
+var response2 = httpclient2.execute(httpPost2);
+
+try {
+     var statusCode = response2.getStatusLine().getStatusCode();
+     var entity = response2.getEntity();
+     var responseString = EntityUtils.toString(entity, &quot;UTF-8&quot;);
+
+  
+
+     channelMap.put(&quot;statusCode&quot;, statusCode);
+	channelMap.put(&quot;responseString&quot;, responseString);
+	channelMap.put(&quot;token&quot;, responseString);
+
+} finally {
+     response2.close();
+}
+</script>
+      </properties>
+      <transformer version="3.4.1">
+        <steps/>
+        <inboundDataType>RAW</inboundDataType>
+        <outboundDataType>RAW</outboundDataType>
+        <inboundProperties class="com.mirth.connect.plugins.datatypes.raw.RawDataTypeProperties" version="3.4.1">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.raw.RawBatchProperties" version="3.4.1">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </inboundProperties>
+        <outboundProperties class="com.mirth.connect.plugins.datatypes.raw.RawDataTypeProperties" version="3.4.1">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.raw.RawBatchProperties" version="3.4.1">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </outboundProperties>
+      </transformer>
+      <responseTransformer version="3.4.1">
+        <steps/>
+        <inboundDataType>RAW</inboundDataType>
+        <outboundDataType>RAW</outboundDataType>
+        <inboundProperties class="com.mirth.connect.plugins.datatypes.raw.RawDataTypeProperties" version="3.4.1">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.raw.RawBatchProperties" version="3.4.1">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </inboundProperties>
+        <outboundProperties class="com.mirth.connect.plugins.datatypes.raw.RawDataTypeProperties" version="3.4.1">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.raw.RawBatchProperties" version="3.4.1">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </outboundProperties>
+      </responseTransformer>
+      <filter version="3.4.1">
+        <rules/>
+      </filter>
+      <transportName>JavaScript Writer</transportName>
+      <mode>DESTINATION</mode>
+      <enabled>true</enabled>
+      <waitForPrevious>true</waitForPrevious>
+    </connector>
+    <connector version="3.4.1">
+      <metaDataId>2</metaDataId>
+      <name>Create Task</name>
+      <properties class="com.mirth.connect.connectors.js.JavaScriptDispatcherProperties" version="3.4.1">
+        <pluginProperties/>
+        <destinationConnectorProperties version="3.4.1">
+          <queueEnabled>false</queueEnabled>
+          <sendFirst>false</sendFirst>
+          <retryIntervalMillis>10000</retryIntervalMillis>
+          <regenerateTemplate>false</regenerateTemplate>
+          <retryCount>0</retryCount>
+          <rotate>false</rotate>
+          <includeFilterTransformer>false</includeFilterTransformer>
+          <threadCount>1</threadCount>
+          <threadAssignmentVariable></threadAssignmentVariable>
+          <validateResponse>false</validateResponse>
+          <resourceIds class="linked-hash-map">
+            <entry>
+              <string>Default Resource</string>
+              <string>[Default Resource]</string>
+            </entry>
+          </resourceIds>
+          <queueBufferSize>1000</queueBufferSize>
+        </destinationConnectorProperties>
+        <script>importPackage(Packages.org.apache.http.client);
+importPackage(Packages.org.apache.http.client.methods);
+importPackage(Packages.org.apache.http.impl.client);
+importPackage(Packages.org.apache.http.message);
+importPackage(Packages.org.apache.http.client.entity);
+importPackage(Packages.org.apache.http.util);
+importPackage(Packages.org.apache.http.entity);
+
+var httpclient = new DefaultHttpClient();
+
+//TODO: Init your Allscripts Appname, determine which clinician you should route task to and ID the patient, 
+//likely setup in the config of the function that generates the card in Teams
+
+var Appname = &quot;&quot;;
+
+var queryForPatient = {
+    &quot;Action&quot;: &quot;SaveTask&quot;,
+    &quot;Appname&quot;: appName,
+    &quot;AppUserID&quot;: &quot;jmedici&quot;, //The default Allscripts TW Sandbox Doctor
+    &quot;PatientID&quot;: &quot;10718&quot;, //Just a test patient
+    &quot;Token&quot;: $(&apos;token&apos;),
+    &quot;Parameter1&quot;: &quot;SignNote&quot;,
+    &quot;Parameter2&quot;: &quot;jmedici&quot;, //The default Allscripts TW Sandbox Doctor
+    &quot;Parameter3&quot;: &quot;0&quot;,
+    &quot;Parameter4&quot;: $(&apos;task&apos;),
+    &quot;Parameter5&quot;: &quot;Note from Teams&quot;,
+    &quot;Parameter6&quot;: &quot;&quot;,
+    &quot;Data&quot;: &quot;null&quot;
+};
+
+// getMedications
+var httpPost = new HttpPost(&quot;http://twlatestga.unitysandbox.com/unity/unityservice.svc/json/MagicJson&quot;);
+httpPost.setHeader(&quot;Content-type&quot;, &quot;application/json&quot;);
+httpPost.setEntity(new StringEntity((JSON.stringify(queryForPatient)), &quot;UTF-8&quot;));
+var response = httpclient.execute(httpPost);
+
+try {
+     var statusCode = response.getStatusLine().getStatusCode();
+     var entity = response.getEntity();
+     var responseString = EntityUtils.toString(entity, &quot;UTF-8&quot;);
+
+     channelMap.put(&quot;taskstatusCode&quot;, statusCode);
+	channelMap.put(&quot;taskresponseString&quot;, responseString);
+
+} finally {
+     response.close();
+}
+</script>
+      </properties>
+      <transformer version="3.4.1">
+        <steps/>
+        <inboundDataType>RAW</inboundDataType>
+        <outboundDataType>RAW</outboundDataType>
+        <inboundProperties class="com.mirth.connect.plugins.datatypes.raw.RawDataTypeProperties" version="3.4.1">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.raw.RawBatchProperties" version="3.4.1">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </inboundProperties>
+        <outboundProperties class="com.mirth.connect.plugins.datatypes.raw.RawDataTypeProperties" version="3.4.1">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.raw.RawBatchProperties" version="3.4.1">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </outboundProperties>
+      </transformer>
+      <responseTransformer version="3.4.1">
+        <steps/>
+        <inboundDataType>RAW</inboundDataType>
+        <outboundDataType>RAW</outboundDataType>
+        <inboundProperties class="com.mirth.connect.plugins.datatypes.raw.RawDataTypeProperties" version="3.4.1">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.raw.RawBatchProperties" version="3.4.1">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </inboundProperties>
+        <outboundProperties class="com.mirth.connect.plugins.datatypes.raw.RawDataTypeProperties" version="3.4.1">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.raw.RawBatchProperties" version="3.4.1">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </outboundProperties>
+      </responseTransformer>
+      <filter version="3.4.1">
+        <rules/>
+      </filter>
+      <transportName>JavaScript Writer</transportName>
+      <mode>DESTINATION</mode>
+      <enabled>true</enabled>
+      <waitForPrevious>true</waitForPrevious>
+    </connector>
+  </destinationConnectors>
+  <preprocessingScript>// Modify the message variable below to pre process data
+return message;</preprocessingScript>
+  <postprocessingScript>// This script executes once after a message has been processed
+// Responses returned from here will be stored as &quot;Postprocessor&quot; in the response map
+return;</postprocessingScript>
+  <deployScript>// This script executes once when the channel is deployed
+// You only have access to the globalMap and globalChannelMap here to persist data
+return;</deployScript>
+  <undeployScript>// This script executes once when the channel is undeployed
+// You only have access to the globalMap and globalChannelMap here to persist data
+return;</undeployScript>
+  <properties version="3.4.1">
+    <clearGlobalChannelMap>true</clearGlobalChannelMap>
+    <messageStorageMode>DEVELOPMENT</messageStorageMode>
+    <encryptData>false</encryptData>
+    <removeContentOnCompletion>false</removeContentOnCompletion>
+    <removeOnlyFilteredOnCompletion>false</removeOnlyFilteredOnCompletion>
+    <removeAttachmentsOnCompletion>false</removeAttachmentsOnCompletion>
+    <initialState>STARTED</initialState>
+    <storeAttachments>false</storeAttachments>
+    <tags class="linked-hash-set"/>
+    <metaDataColumns>
+      <metaDataColumn>
+        <name>SOURCE</name>
+        <type>STRING</type>
+        <mappingName>mirth_source</mappingName>
+      </metaDataColumn>
+      <metaDataColumn>
+        <name>TYPE</name>
+        <type>STRING</type>
+        <mappingName>mirth_type</mappingName>
+      </metaDataColumn>
+    </metaDataColumns>
+    <attachmentProperties version="3.4.1">
+      <type>None</type>
+      <properties/>
+    </attachmentProperties>
+    <archiveEnabled>true</archiveEnabled>
+    <resourceIds class="linked-hash-map">
+      <entry>
+        <string>Default Resource</string>
+        <string>[Default Resource]</string>
+      </entry>
+    </resourceIds>
+  </properties>
+  <codeTemplateLibraries/>
+</channel>
