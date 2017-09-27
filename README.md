@@ -1,4 +1,5 @@
-#Datica Platform - Microsoft Teams to EHR Data#
+# Datica Platform - Microsoft Teams to EHR Data #
+
 A collection of Mirth Connect channels to facilitate creating Microsoft Teams cards from HL7 messages built for a demo from Datica for MS Ignite 2017. 
 
 Mirth Connect is an open-source healthcare interface engine, designed to facilitate data transformation specific to the healthcare industry. It can manage protocols from HL7, which is the organization that manages the "comprehensive framework and related standards for the exchange, integration, sharing, and retrieval of electronic health information that supports clinical practice and the management, delivery and evaluation of health services." With a permissive license, a modern JavaScript engine to script transformations and strong community, it's the best product to use to get started with healthcare integration. While Mirth ultimately needs to be run in a HIPAA compliant environment like the [Datica Platform](https://datica.com/platform/), it's easy enough to experiment with Mirth by either deploying locally or installing it on a Linux VM. If you're interested in trying Mirth out, I've written a gist on how to deploy Mirth on linux here: https://gist.github.com/molsches/322bce27f21b65768f12
